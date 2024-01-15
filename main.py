@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Request
+from http import HTTPStatus
+
+from fastapi import FastAPI, Request, Response
 import requests
 import json
 
@@ -16,7 +18,20 @@ async def get_zones():
     return json.loads(response.content)
 
 
-@app.patch(PDNS_ZONE_URL + '/{zone}')
-async def patch_zone(request: Request, zone: str):
-    response = requests.patch(PDNS_ZONE_URL + '/{zone}', headers=HEADERS, data=request.json())
+@app.api_route(PDNS_ZONE_URL + '/{zone}', methods=['GET', 'PATCH'])
+async def patch_zone(request: Request, api_response: Response, zone: str):
+    request_f = requests.get
+    data = None
+    if request.method == 'PATCH':
+        request_f = requests.patch
+        data = await request.json()
+    response = request_f(PDNS_URL + PDNS_ZONE_URL + '/' + zone, headers=HEADERS, data=json.dumps(data))
+    if response.status_code == 204:
+        return Response(status_code=HTTPStatus.NO_CONTENT)
     return json.loads(response.content)
+
+
+@app.put(PDNS_ZONE_URL + '/{zone}/notify')
+async def notify_zone(zone: str):
+    response = requests.get(PDNS_URL + PDNS_ZONE_URL + '/' + zone + '/.notify', headers=HEADERS)
+    return response.content
