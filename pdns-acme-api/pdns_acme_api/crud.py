@@ -11,6 +11,10 @@ def get_host_by_token(db: Session, token_hash: str):
     return db.query(models.Host).filter(models.Host.token == token_hash).first()
 
 
+def get_hosts(db: Session):
+    return db.query(models.Host).all()
+
+
 def create_host(db: Session, host: schemas.HostCreate):
     token_hash = sha512(host.token)
     db_host = models.Host(hostname=host.hostname, token=token_hash)

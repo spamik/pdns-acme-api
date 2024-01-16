@@ -50,9 +50,9 @@ async def notify_zone(zone: str):
     return response.content
 
 
-@router.get('/acme-api/hosts/')
+@router.get('/acme-api/hosts/', response_model=list[schemas.Host])
 async def list_hosts(db: Session = Depends(get_db)):
-    return db.query(models.Host).all()
+    return crud.get_hosts(db)
 
 
 @router.post('/acme-api/hosts/')
