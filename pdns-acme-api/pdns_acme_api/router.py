@@ -4,7 +4,8 @@ import requests
 import json
 
 from . import models, schemas, crud
-from .database import SessionLocal, engine
+from .database import SessionLocal, engine, get_db
+from .tokenauth import validate_token
 from sqlalchemy.orm import Session
 
 models.Base.metadata.create_all(bind=engine)
@@ -17,21 +18,13 @@ HEADERS = {
 }
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@router.get(PDNS_ZONE_URL)
+@router.get(PDNS_ZONE_URL, dependencies=[Depends(validate_token)])
 async def get_zones():
     response = requests.get(PDNS_URL + PDNS_ZONE_URL, headers=HEADERS)
     return json.loads(response.content)
 
 
-@router.api_route(PDNS_ZONE_URL + '/{zone}', methods=['GET', 'PATCH'])
+@router.api_route(PDNS_ZONE_URL + '/{zone}', methods=['GET', 'PATCH'], dependencies=[Depends(validate_token)])
 async def patch_zone(request: Request, api_response: Response, zone: str):
     request_f = requests.get
     data = None
@@ -44,7 +37,7 @@ async def patch_zone(request: Request, api_response: Response, zone: str):
     return json.loads(response.content)
 
 
-@router.put(PDNS_ZONE_URL + '/{zone}/notify')
+@router.put(PDNS_ZONE_URL + '/{zone}/notify', dependencies=[Depends(validate_token)])
 async def notify_zone(zone: str):
     response = requests.put(PDNS_URL + PDNS_ZONE_URL + '/' + zone + '/notify', headers=HEADERS)
     return response.content
