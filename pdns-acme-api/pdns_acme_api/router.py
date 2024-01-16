@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, APIRouter
 import requests
 import json
 
@@ -9,7 +9,7 @@ from sqlalchemy import Session
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+router = APIRouter()
 PDNS_URL = 'http://172.16.14.28:8082'
 PDNS_ZONE_URL = '/api/v1/servers/localhost/zones'
 HEADERS = {
@@ -25,13 +25,13 @@ def get_db():
         db.close()
 
 
-@app.get(PDNS_ZONE_URL)
+@router.get(PDNS_ZONE_URL)
 async def get_zones():
     response = requests.get(PDNS_URL + PDNS_ZONE_URL, headers=HEADERS)
     return json.loads(response.content)
 
 
-@app.api_route(PDNS_ZONE_URL + '/{zone}', methods=['GET', 'PATCH'])
+@router.api_route(PDNS_ZONE_URL + '/{zone}', methods=['GET', 'PATCH'])
 async def patch_zone(request: Request, api_response: Response, zone: str):
     request_f = requests.get
     data = None
@@ -44,12 +44,12 @@ async def patch_zone(request: Request, api_response: Response, zone: str):
     return json.loads(response.content)
 
 
-@app.put(PDNS_ZONE_URL + '/{zone}/notify')
+@router.put(PDNS_ZONE_URL + '/{zone}/notify')
 async def notify_zone(zone: str):
     response = requests.get(PDNS_URL + PDNS_ZONE_URL + '/' + zone + '/.notify', headers=HEADERS)
     return response.content
 
 
-@app.get('/acme-api/hosts')
+@router.get('/acme-api/hosts')
 async def list_hosts(db: Session):
     return db.query(models.Host).all()
