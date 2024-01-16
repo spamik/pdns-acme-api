@@ -46,7 +46,7 @@ async def patch_zone(request: Request, api_response: Response, zone: str):
 
 @router.put(PDNS_ZONE_URL + '/{zone}/notify')
 async def notify_zone(zone: str):
-    response = requests.get(PDNS_URL + PDNS_ZONE_URL + '/' + zone + '/notify', headers=HEADERS)
+    response = requests.put(PDNS_URL + PDNS_ZONE_URL + '/' + zone + '/notify', headers=HEADERS)
     return response.content
 
 
