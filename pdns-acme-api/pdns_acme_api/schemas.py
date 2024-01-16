@@ -27,6 +27,7 @@ class HostCreate(HostBase):
 
 class Host(HostBase):
     id: int
+    domains: list[DomainMap] = []
 
     class Config:
         orm_mode = True
