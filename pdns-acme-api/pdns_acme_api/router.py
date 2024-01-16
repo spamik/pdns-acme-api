@@ -61,3 +61,8 @@ async def create_host(host: schemas.HostCreate, db: Session = Depends(get_db)):
     if db_host:
         raise HTTPException(status_code=400, detail='Host token already exists')
     return crud.create_host(db=db, host=host)
+
+
+@router.post('/acme-api/hosts/{host_id}/domain_maps/', response_model=schemas.DomainMap)
+async def create_domain_map(host_id: int, domain_map: schemas.DomainMapCreate, db: Session = Depends(get_db)):
+    return crud.create_domain_map(db=db, domain_map=domain_map, host_id=host_id)
