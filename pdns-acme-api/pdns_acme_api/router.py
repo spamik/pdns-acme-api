@@ -1,11 +1,11 @@
 from http import HTTPStatus
-from fastapi import FastAPI, Request, Response, APIRouter
+from fastapi import FastAPI, Request, Response, APIRouter, Depends
 import requests
 import json
 
 from . import models
 from .database import SessionLocal, engine
-from sqlalchemy import Session
+from sqlalchemy.orm import Session
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -51,5 +51,5 @@ async def notify_zone(zone: str):
 
 
 @router.get('/acme-api/hosts')
-async def list_hosts(db: Session):
+async def list_hosts(db: Session = Depends(get_db)):
     return db.query(models.Host).all()
