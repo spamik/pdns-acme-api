@@ -29,3 +29,18 @@ def filter_rrsets(pdns_reply, domains):
     allowed_domains = tuple(i.domain for i in domains)
     pdns_reply['rrsets'] = [i for i in pdns_reply['rrsets'] if filter_dns_name(i['name']) in allowed_domains]
     return pdns_reply
+
+
+def authorize_change_request(request_body, domains):
+    """
+    Returns True if this request wants changes only in specified domains
+    :param request_body: body of request to pDNS API
+    :param domains: allowed domains to change
+    :return: bool
+    """
+    request_count = len(request_body['rrsets'])
+    if request_count != len(filter_rrsets(request_body, domains)['rrsets']):
+        # if filter_rrsets filtered some domains it means that in request is some record for which host is not
+        # authorized
+        return False
+    return True

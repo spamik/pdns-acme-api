@@ -5,7 +5,7 @@ import json
 
 from . import models, schemas, crud
 from .database import SessionLocal, engine, get_db
-from .tokenauth import validate_token, filter_rrsets
+from .tokenauth import validate_token, filter_rrsets, authorize_change_request
 from sqlalchemy.orm import Session
 
 models.Base.metadata.create_all(bind=engine)
@@ -27,18 +27,20 @@ async def get_zones():
 @router.api_route(PDNS_ZONE_URL + '/{zone}', methods=['GET', 'PATCH'], dependencies=[Depends(validate_token)])
 async def patch_zone(request: Request, zone: str, x_api_key: str = Header(), db: Session = Depends(get_db)):
     request_f = requests.get
+    host_domains = crud.get_host_by_token(db, crud.sha512(x_api_key)).domains
     data = None
 
     if request.method == 'PATCH':
         request_f = requests.patch
         data = await request.json()
+        if not authorize_change_request(data, host_domains):
+            raise HTTPException(status_code=401, detail='Unauthorized')
 
     response = request_f(PDNS_URL + PDNS_ZONE_URL + '/' + zone, headers=HEADERS, data=json.dumps(data))
 
     if response.status_code == 204:
         return Response(status_code=HTTPStatus.NO_CONTENT)
 
-    host_domains = crud.get_host_by_token(db, crud.sha512(x_api_key)).domains
     return filter_rrsets(json.loads(response.content), host_domains)
 
 
