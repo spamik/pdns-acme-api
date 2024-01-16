@@ -1,11 +1,11 @@
 from http import HTTPStatus
-from fastapi import FastAPI, Request, Response, APIRouter, Depends, HTTPException
+from fastapi import FastAPI, Request, Response, APIRouter, Depends, HTTPException, Header
 import requests
 import json
 
 from . import models, schemas, crud
 from .database import SessionLocal, engine, get_db
-from .tokenauth import validate_token
+from .tokenauth import validate_token, filter_rrsets
 from sqlalchemy.orm import Session
 
 models.Base.metadata.create_all(bind=engine)
@@ -25,16 +25,21 @@ async def get_zones():
 
 
 @router.api_route(PDNS_ZONE_URL + '/{zone}', methods=['GET', 'PATCH'], dependencies=[Depends(validate_token)])
-async def patch_zone(request: Request, api_response: Response, zone: str):
+async def patch_zone(request: Request, zone: str, x_api_key: str = Header(), db: Session = Depends(get_db)):
     request_f = requests.get
     data = None
+
     if request.method == 'PATCH':
         request_f = requests.patch
         data = await request.json()
+
     response = request_f(PDNS_URL + PDNS_ZONE_URL + '/' + zone, headers=HEADERS, data=json.dumps(data))
+
     if response.status_code == 204:
         return Response(status_code=HTTPStatus.NO_CONTENT)
-    return json.loads(response.content)
+
+    host_domains = crud.get_host_by_token(db, crud.sha512(x_api_key)).domains
+    return filter_rrsets(json.loads(response.content), host_domains)
 
 
 @router.put(PDNS_ZONE_URL + '/{zone}/notify', dependencies=[Depends(validate_token)])
