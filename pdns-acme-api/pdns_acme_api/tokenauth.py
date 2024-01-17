@@ -2,6 +2,17 @@ from fastapi import Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from . import crud
 from .database import get_db
+from .config import ADMIN_TOKEN
+
+
+async def validate_admin(x_api_key: str = Header()):
+    """
+    Authorization validation for admin API endpoints. Raise HTTP unauthorized if token specified in X-API-Key header
+    is not equal with ADMIN_TOKEN in config.py
+    :param x_api_key:
+    """
+    if x_api_key != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail='Unauthorized')
 
 
 async def validate_token(x_api_key: str = Header(), db: Session = Depends(get_db)):
