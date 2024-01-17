@@ -53,6 +53,10 @@ async def list_hosts(db: Session = Depends(get_db)):
     return crud.get_hosts(db)
 
 
+async def get_host(host_id: int):
+    pass
+
+
 @router.post('/acme-api/hosts/', dependencies=[Depends(validate_admin)])
 async def create_host(host: schemas.HostCreate, db: Session = Depends(get_db)):
     db_host = crud.get_host_by_token(db, token_hash=crud.sha512(host.token))
@@ -61,7 +65,22 @@ async def create_host(host: schemas.HostCreate, db: Session = Depends(get_db)):
     return crud.create_host(db=db, host=host)
 
 
+@router.delete('/acme-api/hosts/{host_id}/', dependencies=[Depends(validate_admin)])
+async def delete_host(host_id: int, db: Session = Depends(get_db)):
+    if crud.delete_host(db=db, host_id=host_id):
+        return Response(status_code=HTTPStatus.NO_CONTENT)
+    raise HTTPException(status_code=400, detail='Host does not exists')
+
+
+async def host_set_token(host_id: int, host: None):
+    pass
+
+
 @router.post('/acme-api/hosts/{host_id}/domain_maps/', response_model=schemas.DomainMap,
              dependencies=[Depends(validate_admin)])
 async def create_domain_map(host_id: int, domain_map: schemas.DomainMapCreate, db: Session = Depends(get_db)):
     return crud.create_domain_map(db=db, domain_map=domain_map, host_id=host_id)
+
+
+async def delete_domain_map(domain_map_id: int):
+    pass

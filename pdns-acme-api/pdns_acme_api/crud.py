@@ -24,6 +24,15 @@ def create_host(db: Session, host: schemas.HostCreate):
     return db_host
 
 
+def delete_host(db: Session, host_id: int):
+    host = db.query(models.Host).get(host_id)
+    if host:
+        db.delete(host)
+        db.commit()
+        return True
+    return False
+
+
 def create_domain_map(db: Session, domain_map: schemas.DomainMapCreate, host_id: int):
     db_domain_map = models.DomainMap(domain=domain_map.domain, host_id=host_id)
     db.add(db_domain_map)
