@@ -6,16 +6,14 @@ import json
 from . import models, schemas, crud
 from .database import SessionLocal, engine, get_db
 from .tokenauth import validate_token, filter_rrsets, authorize_change_request
+from .config import PDNS_URL, PDNS_ZONE_URL, HEADERS
 from sqlalchemy.orm import Session
 
 models.Base.metadata.create_all(bind=engine)
+if not(PDNS_URL and PDNS_ZONE_URL and HEADERS['X-API-Key']):
+    raise SystemError('Not valid configuration, you need to specify PowerDNS server URL and API key')
 
 router = APIRouter()
-PDNS_URL = 'http://172.16.14.28:8082'
-PDNS_ZONE_URL = '/api/v1/servers/localhost/zones'
-HEADERS = {
-    'X-API-Key': '0123456789ABCDEF'
-}
 
 
 @router.get(PDNS_ZONE_URL, dependencies=[Depends(validate_token)])
