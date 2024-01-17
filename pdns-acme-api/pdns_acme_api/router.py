@@ -73,11 +73,15 @@ async def create_host(host: schemas.HostCreate, db: Session = Depends(get_db)):
 async def delete_host(host_id: int, db: Session = Depends(get_db)):
     if crud.delete_host(db=db, host_id=host_id):
         return Response(status_code=HTTPStatus.NO_CONTENT)
-    raise HTTPException(status_code=400, detail='Host does not exists')
+    raise HTTPException(status_code=404, detail='Host does not exists')
 
 
-async def host_set_token(host_id: int, host: None):
-    pass
+@router.put('/acme-api/hosts/{host_id}/', dependencies=[Depends(validate_admin)])
+async def host_set_token(host_id: int, host: schemas.HostCreate, db: Session = Depends(get_db)):
+    host = crud.update_host(db, host_id, host)
+    if host:
+        return host
+    raise HTTPException(status_code=404, detail='Host does not exists')
 
 
 @router.post('/acme-api/hosts/{host_id}/domain_maps/', response_model=schemas.DomainMap,

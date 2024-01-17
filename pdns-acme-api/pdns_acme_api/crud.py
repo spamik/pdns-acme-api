@@ -28,6 +28,15 @@ def create_host(db: Session, host: schemas.HostCreate):
     return db_host
 
 
+def update_host(db: Session, host_id: int, host: schemas.HostCreate):
+    db_host = get_host(db, host_id)
+    if db_host:
+        db_host.hostname = host.hostname
+        db_host.token = sha512(host.token)
+        db.commit()
+    return host
+
+
 def delete_host(db: Session, host_id: int):
     host = get_host(db, host_id)
     if host:
