@@ -53,8 +53,12 @@ async def list_hosts(db: Session = Depends(get_db)):
     return crud.get_hosts(db)
 
 
-async def get_host(host_id: int):
-    pass
+@router.get('/acme-api/hosts/{host_id}/', response_model=schemas.Host, dependencies=[Depends(validate_admin)])
+async def get_host(host_id: int, db: Session = Depends(get_db)):
+    host = crud.get_host(db, host_id)
+    if host:
+        return host
+    raise HTTPException(status_code=404, detail='Host not found')
 
 
 @router.post('/acme-api/hosts/', dependencies=[Depends(validate_admin)])

@@ -11,6 +11,10 @@ def get_host_by_token(db: Session, token_hash: str):
     return db.query(models.Host).filter(models.Host.token == token_hash).first()
 
 
+def get_host(db: Session, host_id):
+    return db.query(models.Host).get(host_id)
+
+
 def get_hosts(db: Session):
     return db.query(models.Host).all()
 
@@ -25,7 +29,7 @@ def create_host(db: Session, host: schemas.HostCreate):
 
 
 def delete_host(db: Session, host_id: int):
-    host = db.query(models.Host).get(host_id)
+    host = get_host(db, host_id)
     if host:
         db.delete(host)
         db.commit()
