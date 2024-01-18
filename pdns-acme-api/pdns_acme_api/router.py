@@ -90,5 +90,8 @@ async def create_domain_map(host_id: int, domain_map: schemas.DomainMapCreate, d
     return crud.create_domain_map(db=db, domain_map=domain_map, host_id=host_id)
 
 
-async def delete_domain_map(domain_map_id: int):
-    pass
+@router.delete('/acme-api/domain-maps/{domain_map_id}/', dependencies=[Depends(validate_admin)])
+async def delete_domain_map(domain_map_id: int, db: Session = Depends(get_db)):
+    if crud.delete_domain_map(db, domain_map_id):
+        return Response(status_code=HTTPStatus.NO_CONTENT)
+    raise HTTPException(status_code=404, detail='Domain map does not exists')

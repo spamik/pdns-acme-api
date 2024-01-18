@@ -52,3 +52,12 @@ def create_domain_map(db: Session, domain_map: schemas.DomainMapCreate, host_id:
     db.commit()
     db.refresh(db_domain_map)
     return db_domain_map
+
+
+def delete_domain_map(db: Session, domain_map_id: int):
+    domain_map = db.query(models.DomainMap).get(domain_map_id)
+    if domain_map:
+        db.delete(domain_map)
+        db.commit()
+        return True
+    return False
