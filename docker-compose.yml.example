@@ -10,3 +10,8 @@ services:
       PDNS_ADDRESS: http://pdns.server.com:8081
       PDNS_TOKEN: top_secret_token
       ADMIN_TOKEN: even_more_secret_token
+    volumes:
+      - pdns_acme_api_data:/var/lib/pdns-acme-api
+volumes:
+  pdns_acme_api_data:
+    driver: local

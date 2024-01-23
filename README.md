@@ -26,7 +26,7 @@ Dockerfile is included in this repo, so easiest way to run this API is using doc
 - PDNS_ADDRESS - URL to PowerDNS WEB API including HTTP port. For example, if pDNS server is running on host my-ns.com on port 8081, it would be http://my-ns.com:8081
 - PDNS_TOKEN - api key variable from pdns.com
 - ADMIN_TOKEN - token/key for managing requests to this API. This token you need for managing hosts and theirs DNS records. Also use some random, long, secure string
-- DB # TODO
+- DATABASE_URL - SQLAlchemy URL for database connection. This is optional, default value stores data in SQLite database in named volume created in docker-compose file. But you can adjust it if you need. With some modification (probably installation python database drivers) you can save data in SQL database. Database is needed for storing host tokens and domains.
 
 Now just build image and run it:
 
