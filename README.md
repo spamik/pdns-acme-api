@@ -47,3 +47,5 @@ You can visit /docs URL to see all endpoints in swagger UI. You can also submit 
 - PUT /acme-api/hosts/{host_id}/ - change host token (API key)
 - POST /acme-api/hosts/{host_id}/domain_maps/ - add new allowed DNS record for this host
 - DELETE /acme-api/domain-maps/{domain_map_id}/ - delete this binded DNS record
+
+Note that host access token serves also as a host identification. For this reason, token must be unique. This shouldn't be limitation as these should really be long, random strings and also this API will be probably maintained by one or few administrators.
