@@ -1,0 +1,12 @@
+services:
+  pdns_acme_api:
+    build:
+      dockerfile: Dockerfile
+    container_name: pdns_acme_api
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    environment:
+      PDNS_ADDRESS: http://pdns.server.com:8081
+      PDNS_TOKEN: top_secret_token
+      ADMIN_TOKEN: even_more_secret_token
